@@ -1,0 +1,76 @@
+{
+    "kind": "collectionType",
+    "collectionName": "blog_posts",
+    "info": {
+        "singularName": "blog-post",
+        "pluralName": "blog-posts",
+        "displayName": "Blog Post",
+        "description": "Blog posts for the personal website"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "title",
+            "required": true
+        },
+        "excerpt": {
+            "type": "text",
+            "maxLength": 500
+        },
+        "content": {
+            "type": "richtext",
+            "required": true
+        },
+        "author": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "plugin::users-permissions.user",
+            "inversedBy": "blog_posts"
+        },
+        "categories": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::category.category",
+            "inversedBy": "blog_posts"
+        },
+        "tags": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::tag.tag",
+            "inversedBy": "blog_posts"
+        },
+        "featured_image": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images"
+            ]
+        },
+        "featured": {
+            "type": "boolean",
+            "default": false
+        },
+        "reading_time": {
+            "type": "integer",
+            "min": 1
+        },
+        "meta_title": {
+            "type": "string",
+            "maxLength": 60
+        },
+        "meta_description": {
+            "type": "text",
+            "maxLength": 160
+        }
+    }
+}

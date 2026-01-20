@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000
+      - VITE_STRAPI_URL=http://localhost:1337
+    depends_on:
+      - api
+      - cms
+    networks:
+      - personal-website-network
+
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./packages/api:/app
+      - ./uploads:/app/uploads
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql://personal_website_user:personal_website_pass@postgres:5432/personal_website
+      - STRAPI_URL=http://cms:1337
+      - JWT_SECRET=your-shared-jwt-secret-key-change-in-production
+      - STORAGE_PROVIDER=local
+      - STORAGE_LOCAL_PATH=/app/uploads
+      - STORAGE_LOCAL_URL=http://localhost:8000/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cms:
+        condition: service_started
+    networks:
+      - personal-website-network
+
+  cms:
+    build:
+      context: ./packages/cms
+      dockerfile: Dockerfile.dev
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./packages/cms:/app
+      - ./uploads/strapi:/app/public/uploads
+    environment:
+      - NODE_ENV=development
+      - DATABASE_CLIENT=postgres
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=personal_website
+      - DATABASE_USERNAME=personal_website_user
+      - DATABASE_PASSWORD=personal_website_pass
+      - DATABASE_SSL=false
+      - DATABASE_SCHEMA=strapi
+      - JWT_SECRET=your-shared-jwt-secret-key-change-in-production
+      - ADMIN_JWT_SECRET=your-admin-jwt-secret-change-in-production
+      - TRANSFER_TOKEN_SALT=your-transfer-token-salt-change-in-production
+      - API_TOKEN_SALT=your-api-token-salt-change-in-production
+      - APP_KEYS=your-app-keys-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - personal-website-network
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./deployment/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      - POSTGRES_DB=personal_website
+      - POSTGRES_USER=personal_website_user
+      - POSTGRES_PASSWORD=personal_website_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personal_website_user -d personal_website"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - personal-website-network
+
+volumes:
+  postgres_data_dev:
+
+networks:
+  personal-website-network:
+    driver: bridge
