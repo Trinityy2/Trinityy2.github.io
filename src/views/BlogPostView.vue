@@ -224,7 +224,7 @@ const contentEl = ref<HTMLElement | null>(null)
 const activeTocId = ref<string>('')
 const copied = ref(false)
 
-const authorName = 'Your Name'
+const authorName = 'Tomohito Suzuki'
 const authorInitials = computed(() =>
   authorName
     .split(' ')

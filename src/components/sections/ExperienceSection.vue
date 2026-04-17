@@ -2,7 +2,7 @@
   <section id="experience" class="section bg-slate-50 dark:bg-slate-900/50">
     <div class="section-container mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading">Experience</h2>
-      <p class="section-subheading">Where I've worked and what I've shipped</p>
+      <p class="section-subheading">Where I've worked and what I've learned</p>
 
       <div class="mt-12 space-y-6">
         <TimelineEntry v-for="entry in experience" :key="entry.company + entry.dates" :entry="entry" />
@@ -17,36 +17,46 @@ import type { ExperienceEntry } from '@/components/ui/TimelineEntry.vue'
 
 const experience: ExperienceEntry[] = [
   {
-    title: 'Senior Software Engineer',
-    company: 'Company Name',
-    dates: 'Jan 2022 – Present',
+    title: 'Software Developer',
+    company: 'FirstWave Cloud Technology',
+    dates: '2020 – Present · Melbourne, Australia',
     bullets: [
-      'Led development of a microservices-based platform serving 50k+ daily active users, reducing p95 latency by 35%.',
-      'Designed and implemented a real-time event-driven notification system using Azure Service Bus.',
-      'Mentored a team of 4 junior engineers, introducing TDD practices that improved test coverage from 40% to 85%.',
+      'Develop and maintain features across the full stack of FirstWave\'s network security management platform.',
+      'Build and optimise data integration pipelines for ingesting, transforming, and normalising network telemetry at scale.',
+      'Collaborate closely with cross-functional teams to deliver reliable, production-ready software in an agile environment.',
     ],
-    tags: ['Vue 3', 'Node.js', 'Azure', 'PostgreSQL', 'Docker'],
+    tags: ['JavaScript', 'Python', 'REST APIs', 'SQL', 'Data Integration'],
   },
   {
-    title: 'Full-Stack Developer',
-    company: 'Previous Company',
-    dates: 'Jun 2019 – Dec 2021',
+    title: 'Intern Software Engineer — Data Integration',
+    company: 'FirstWave Cloud Technology',
+    dates: '2019 – 2020 · Melbourne, Australia',
     bullets: [
-      'Built and maintained a multi-tenant SaaS reporting platform processing 2M+ records daily.',
-      'Migrated a legacy SQL Server database to PostgreSQL, improving query performance by 40%.',
-      'Delivered a customer-facing REST API consumed by 15+ third-party integrations.',
+      'Developed ETL pipelines to ingest and normalise network event data from multiple third-party sources.',
+      'Built internal tooling to automate data validation, error reporting, and pipeline monitoring.',
+      'Gained hands-on experience with large-scale data workflows and production data systems.',
     ],
-    tags: ['React', 'C# / .NET', 'SQL Server', 'Redis'],
+    tags: ['Python', 'SQL', 'ETL', 'Data Pipelines'],
   },
   {
-    title: 'Junior Developer',
-    company: 'First Company',
-    dates: 'Sep 2017 – May 2019',
+    title: 'Teaching Associate (PASS Mentor)',
+    company: 'Monash University',
+    dates: '2018 – 2019 · Melbourne, Australia',
     bullets: [
-      'Developed internal tooling that reduced manual data entry time by 60%.',
-      'Contributed to a greenfield e-commerce platform from initial design through to launch.',
+      'Facilitated weekly Peer-Assisted Study Sessions for undergraduate Information Technology students.',
+      'Supported student learning across programming fundamentals, data structures, and software development subjects.',
     ],
-    tags: ['JavaScript', 'Python', 'MySQL'],
+    tags: ['Teaching', 'Computer Science', 'Programming'],
+  },
+  {
+    title: 'IT & Communications',
+    company: 'MINDEF Communications Organisation',
+    dates: 'Singapore',
+    bullets: [
+      'Supported communications and IT operations in a highly structured, mission-critical environment.',
+      'Developed an understanding of secure systems, network infrastructure, and operational discipline.',
+    ],
+    tags: ['Networking', 'Communications', 'IT Operations'],
   },
 ]
 </script>

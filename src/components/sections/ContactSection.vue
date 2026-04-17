@@ -16,7 +16,7 @@
             Send me an email
           </a>
           <a
-            href="https://linkedin.com/in/yourprofile"
+            href="https://linkedin.com/in/tomohito-suzuki-4a4b69160"
             target="_blank"
             rel="noopener noreferrer"
             class="btn-secondary"
