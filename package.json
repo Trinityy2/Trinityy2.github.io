@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bunx vite",
-    "build": "bunx vue-tsc && bunx vite build",
-    "preview": "bunx vite preview",
-    "lint": "bunx eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "bunx prettier --write src/",
-    "type-check": "bunx vue-tsc --noEmit"
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
