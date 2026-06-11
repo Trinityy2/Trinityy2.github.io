@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: 5173,
+      port: Number(env.PORT) || 5173,
     },
   }
 })

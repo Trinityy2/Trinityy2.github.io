@@ -55,7 +55,12 @@
         <!-- Avatar -->
         <div class="animate-fade-in flex flex-shrink-0 items-center justify-center">
           <div class="relative h-48 w-48 sm:h-64 sm:w-64">
-            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 opacity-20 blur-2xl"></div>
+            <!-- Radial-gradient aura instead of a blur filter: filter ink overflow gets
+                 rectangle-clipped inside the scrolled/transformed section stage -->
+            <div
+              class="absolute -inset-16 rounded-full bg-[radial-gradient(closest-side,theme(colors.primary.500/0.35),theme(colors.primary.500/0.12)_60%,transparent)]"
+              aria-hidden="true"
+            ></div>
             <div class="relative h-full w-full overflow-hidden rounded-full border-4 border-white shadow-xl dark:border-slate-800">
               <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 text-6xl font-bold text-white">
                 <!-- Replace with <img src="/avatar.jpg" alt="Tomohito Suzuki" class="h-full w-full object-cover" /> -->

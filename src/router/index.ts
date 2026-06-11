@@ -32,6 +32,11 @@ export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
+    // Home is a fixed full-viewport stage (no scrolling) — its hash is handled
+    // by the sections store + anime.js, never by browser scrolling.
+    if (to.name === 'Home') {
+      return { top: 0 }
+    }
     if (savedPosition) {
       return savedPosition
     } else if (to.hash) {
