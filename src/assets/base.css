@@ -35,8 +35,9 @@ body {
 }
 
 body {
-  /* Letterboxing behind the stage, matching the prototype. */
-  background: #000;
+  /* Letterboxing behind the stage. Resolves from the zone tokens declared on
+     `:root`, so no colour in the site sits outside that system. */
+  background: var(--zone-bg);
   font-family: var(--font-body);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
@@ -66,11 +67,6 @@ a:hover {
   color: var(--soul-red);
 }
 
-img {
-  /* Pixel art must survive contact with the browser. */
-  image-rendering: pixelated;
-}
-
 /*
  * THE RESPONSIVE INVERSION.
  *
@@ -81,6 +77,10 @@ img {
  * Do not invert this. With the lock as the baseline and mobile as the
  * exception, adding a designed mobile experience later means unpicking the
  * viewport lock out of the application shell rather than writing styles.
+ *
+ * 900px is the canonical desktop breakpoint. CSS cannot put a custom property
+ * in a media query, so the literal recurs in App.vue and in each view — if it
+ * moves, it moves in all of them together.
  */
 @media (min-width: 900px) {
   html,

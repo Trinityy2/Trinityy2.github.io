@@ -8,30 +8,37 @@
     pose: 'idle',
   })
 
-  const SPRITE_FOR_ZONE: Record<Zone, string> = {
-    about: 'avatar-void.png',
-    work: 'avatar-ruins.png',
-    blog: 'avatar-snowdin.png',
+  interface Art {
+    file: string
+    alt: string
   }
 
-  const ALT_FOR_ZONE: Record<Zone, string> = {
-    about: 'Pixel-art avatar standing in the void, keyboard held like a sword',
-    work: 'Pixel-art avatar mid-stride through the ruins, keyboard carried',
-    blog: 'Pixel-art avatar in the snow, keyboard held low',
+  const ART_FOR_ZONE: Record<Zone, Art> = {
+    about: {
+      file: 'avatar-void.png',
+      alt: 'Pixel-art avatar standing in the void, keyboard held like a sword',
+    },
+    work: {
+      file: 'avatar-ruins.png',
+      alt: 'Pixel-art avatar mid-stride through the ruins, keyboard carried',
+    },
+    blog: {
+      file: 'avatar-snowdin.png',
+      alt: 'Pixel-art avatar in the snow, keyboard held low',
+    },
   }
 
-  function spriteFor(zone: Zone, _pose: AvatarPose): string {
-    // Every pose resolves to the idle image until other poses are drawn.
-    return SPRITE_FOR_ZONE[zone]
+  function artFor(zone: Zone, _pose: AvatarPose): Art {
+    // Every pose resolves to the idle art until other poses are drawn.
+    return ART_FOR_ZONE[zone]
   }
 
-  const src = computed(
-    () => `${import.meta.env.BASE_URL}sprites/${spriteFor(props.zone, props.pose)}`
-  )
+  const art = computed(() => artFor(props.zone, props.pose))
+  const src = computed(() => `${import.meta.env.BASE_URL}sprites/${art.value.file}`)
 </script>
 
 <template>
-  <img class="pixel-avatar" :src="src" :alt="ALT_FOR_ZONE[zone]" width="168" height="204" />
+  <img class="pixel-avatar" :src="src" :alt="art.alt" width="168" height="204" />
 </template>
 
 <style scoped>

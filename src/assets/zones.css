@@ -9,9 +9,14 @@
  * The one token deliberately outside the zone system is the soul red, which
  * never recolours. It lives in base.css as a global.
  *
+ * The About palette is also declared on `:root` so that anything painted
+ * outside the shell — the letterboxing behind the stage, overscroll — still
+ * resolves from a zone token rather than a loose literal.
+ *
  * Values are the reconciled table from #72's Zone theming decisions.
  */
 
+:root,
 [data-zone='about'] {
   --zone-bg: #0a0a0f;
   --zone-panel: #16161f;
@@ -20,7 +25,8 @@
   --zone-body: #c8c8d2;
   --zone-muted: #8a8a99;
   --zone-accent: #ffd23f;
-  --zone-accent-2: #ff2e2e;
+  /* In the void the second accent *is* the soul. One definition, not two. */
+  --zone-accent-2: var(--soul-red);
   --zone-line: #1e1e28;
 }
 
