@@ -2,6 +2,7 @@ import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createMemoryHistory } from 'vue-router'
 
 import App from '@/App.vue'
+import { bundledContent, SITE_CONTENT, type SiteContent } from '@/content'
 import { createAppRouter } from '@/router'
 
 /**
@@ -11,14 +12,22 @@ import { createAppRouter } from '@/router'
  * controls — and assert on rendered output and route state. Nothing below this
  * boundary is tested directly. See #72's Testing Decisions.
  */
-export async function mountApp(initialPath = '/'): Promise<VueWrapper> {
+export async function mountApp(
+  initialPath = '/',
+  content: Partial<SiteContent> = {}
+): Promise<VueWrapper> {
   const router = createAppRouter(createMemoryHistory())
 
   await router.push(initialPath)
   await router.isReady()
 
   const wrapper = mount(App, {
-    global: { plugins: [router] },
+    global: {
+      plugins: [router],
+      // Only the keys a test names are overridden; the rest stay the real
+      // bundled content, so a test opts in to fixtures rather than out.
+      provide: { [SITE_CONTENT as symbol]: { ...bundledContent, ...content } },
+    },
     attachTo: document.body,
   })
 

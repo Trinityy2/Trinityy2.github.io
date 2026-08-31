@@ -340,3 +340,103 @@ describe('the zone transition, continued', () => {
     expect(app.find('[data-zone]').attributes('data-zone')).toBe('work')
   })
 })
+
+describe('the experience carousel', () => {
+  it('shows one encounter at a time, with its authored level', async () => {
+    const app = await mountApp('/work', {
+      experience: [
+        {
+          title: 'FIRST ROLE',
+          organisation: 'Somewhere',
+          dates: '2024 — Now',
+          level: 12,
+          responsibilities: ['* Did the first thing.'],
+          tags: ['Alpha'],
+        },
+        {
+          title: 'SECOND ROLE',
+          organisation: 'Elsewhere',
+          dates: '2020 — 2024',
+          level: 7,
+          responsibilities: ['* Did the second thing.'],
+          tags: ['Beta'],
+        },
+      ],
+    })
+
+    expect(app.text()).toContain('FIRST ROLE')
+    expect(app.text()).toContain('LV 12')
+    expect(app.text()).not.toContain('SECOND ROLE')
+  })
+})
+
+function encounters(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    title: `ROLE ${i + 1}`,
+    organisation: 'Somewhere',
+    dates: '2020 — 2024',
+    level: 10 - i,
+    responsibilities: [`* Did thing ${i + 1}.`],
+    tags: ['Alpha'],
+  }))
+}
+
+describe('stepping through encounters', () => {
+  it('steps through the entries and tracks position', async () => {
+    const app = await mountApp('/work', { experience: encounters(3) })
+    const [previous, next] = app.findAll('button')
+
+    expect(app.find('.work__counter').text()).toBe('1 / 3')
+
+    await next.trigger('click')
+    expect(app.text()).toContain('ROLE 2')
+    expect(app.find('.work__counter').text()).toBe('2 / 3')
+
+    await previous.trigger('click')
+    expect(app.text()).toContain('ROLE 1')
+    expect(app.find('.work__counter').text()).toBe('1 / 3')
+  })
+
+  it('disables the controls at each end rather than leaving them dead', async () => {
+    const app = await mountApp('/work', { experience: encounters(2) })
+    const [previous, next] = app.findAll('button')
+
+    expect(previous.attributes('disabled')).toBeDefined()
+    expect(next.attributes('disabled')).toBeUndefined()
+
+    await next.trigger('click')
+
+    expect(app.find('.work__counter').text()).toBe('2 / 2')
+    expect(previous.attributes('disabled')).toBeUndefined()
+    expect(next.attributes('disabled')).toBeDefined()
+
+    // Clicking the dead control changes nothing.
+    await next.trigger('click')
+    expect(app.find('.work__counter').text()).toBe('2 / 2')
+  })
+
+  it('degrades to a single entry with both controls dead', async () => {
+    const app = await mountApp('/work', { experience: encounters(1) })
+    const [previous, next] = app.findAll('button')
+
+    expect(app.find('.work__counter').text()).toBe('1 / 1')
+    expect(app.findAll('.work__dot')).toHaveLength(1)
+    expect(previous.attributes('disabled')).toBeDefined()
+    expect(next.attributes('disabled')).toBeDefined()
+  })
+
+  it('derives dots and counter from the data, at any length', async () => {
+    const app = await mountApp('/work', { experience: encounters(7) })
+
+    expect(app.findAll('.work__dot')).toHaveLength(7)
+    expect(app.find('.work__counter').text()).toBe('1 / 7')
+  })
+})
+
+describe('the bundled career history', () => {
+  it('marks every placeholder entry as needing replacement', async () => {
+    const app = await mountApp('/work')
+
+    expect(app.text()).toContain('PLACEHOLDER')
+  })
+})
