@@ -1,6 +1,8 @@
 import { inject, type InjectionKey } from 'vue'
 
 import { experience as bundledExperience, type Experience } from '@/data/experience'
+import { bundledPosts } from '@/posts/bundled'
+import type { Post } from '@/posts/parsePosts'
 
 /**
  * The content the app renders, as an injectable value.
@@ -15,6 +17,7 @@ import { experience as bundledExperience, type Experience } from '@/data/experie
  */
 export interface SiteContent {
   experience: readonly Experience[]
+  posts: readonly Post[]
 }
 
 export const SITE_CONTENT: InjectionKey<SiteContent> = Symbol('site-content')
@@ -22,6 +25,7 @@ export const SITE_CONTENT: InjectionKey<SiteContent> = Symbol('site-content')
 /** The real, bundled content. Also the default when nothing is provided. */
 export const bundledContent: SiteContent = {
   experience: bundledExperience,
+  posts: bundledPosts,
 }
 
 export function useSiteContent(): SiteContent {

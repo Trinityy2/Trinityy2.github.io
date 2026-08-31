@@ -1,6 +1,9 @@
 import { flushPromises } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { parsePosts } from '@/posts/parsePosts'
+
+import { draftPost, longPost, manyPosts, newerPost, olderPost } from './fixtures/posts'
 import { flushRouter, mountApp } from './helpers/mountApp'
 
 describe('the About zone', () => {
@@ -438,5 +441,66 @@ describe('the bundled career history', () => {
     const app = await mountApp('/work')
 
     expect(app.text()).toContain('PLACEHOLDER')
+  })
+})
+
+describe('the blog landing', () => {
+  it('lists posts newest first and leaves drafts out entirely', async () => {
+    const app = await mountApp('/blog', {
+      posts: parsePosts([olderPost, draftPost, newerPost]),
+    })
+
+    const titles = app.findAll('.post-card__title').map((t) => t.text())
+    expect(titles).toEqual(['The Newer One', 'The Older One'])
+    expect(app.text()).not.toContain('Not Ready')
+  })
+})
+
+describe('the blog landing, continued', () => {
+  it('computes reading time from the post itself', async () => {
+    const app = await mountApp('/blog', { posts: parsePosts([longPost]) })
+
+    // 900 words at 200 words a minute.
+    expect(app.find('.post-card__meta').text()).toContain('5 min')
+  })
+
+  it('shows at most four posts, and fewer when there are fewer', async () => {
+    const many = await mountApp('/blog', { posts: parsePosts(manyPosts(6)) })
+    expect(many.findAll('.post-card')).toHaveLength(4)
+
+    const few = await mountApp('/blog', { posts: parsePosts(manyPosts(2)) })
+    expect(few.findAll('.post-card')).toHaveLength(2)
+  })
+
+  it('turns the filename into the post URL', async () => {
+    const app = await mountApp('/blog', { posts: parsePosts([newerPost]) })
+
+    expect(app.find('.post-card').attributes('href')).toBe('/blog/the-newer-one')
+  })
+
+  it('says nothing has been written when there are no posts', async () => {
+    const app = await mountApp('/blog', { posts: [] })
+
+    expect(app.text()).toContain('Nothing has been written')
+    expect(app.findAll('.post-card')).toHaveLength(0)
+  })
+})
+
+describe('parsing a post', () => {
+  it('fails loudly, naming the file, when a required field is missing', () => {
+    const incomplete = {
+      slug: 'half-written',
+      source: '---\ntitle: Half Written\ndate: 2026-01-01\n---\n\nBody.',
+    }
+
+    expect(() => parsePosts([incomplete])).toThrow(
+      /half-written.*missing required frontmatter.*category.*description/
+    )
+  })
+
+  it('fails loudly when there is no frontmatter at all', () => {
+    expect(() => parsePosts([{ slug: 'bare', source: 'Just a body.' }])).toThrow(
+      /bare.*no frontmatter/
+    )
   })
 })
