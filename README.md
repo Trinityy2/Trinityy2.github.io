@@ -13,9 +13,11 @@ and fades back — the way a room transition works in the game.
 
 ## Status
 
-Being rebuilt from scratch. There is no application code yet.
+Being rebuilt from scratch. The walking skeleton ([#73](../../issues/73)) is in:
+the About zone renders at the root from typed data, in the Determination
+palette, with self-hosted pixel fonts and the void avatar sprite.
 
-The work is specified on the issue tracker:
+The rest of the work is specified on the issue tracker:
 
 - **[#72](../../issues/72)** — the spec: problem, solution, user stories,
   implementation and testing decisions, scope.

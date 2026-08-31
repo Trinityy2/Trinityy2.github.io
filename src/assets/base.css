@@ -1,0 +1,91 @@
+/*
+ * Global base. Design-system invariants applying everywhere: 3px hard borders,
+ * zero border-radius, no gradients, no shadows, Silkscreen for headings and
+ * labels, IBM Plex Mono for body text, and an 8px spacing grid.
+ */
+
+:root {
+  /* The one colour outside the zone system. The soul never recolours. */
+  --soul-red: #ff2e2e;
+
+  --font-display: 'Silkscreen', monospace;
+  --font-body: 'IBM Plex Mono', monospace;
+
+  --border-width: 3px;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* Letterboxing behind the stage, matching the prototype. */
+  background: #000;
+  font-family: var(--font-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--zone-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--soul-red);
+}
+
+img {
+  /* Pixel art must survive contact with the browser. */
+  image-rendering: pixelated;
+}
+
+/*
+ * THE RESPONSIVE INVERSION.
+ *
+ * The mobile baseline above is an ordinary scrolling document. The
+ * full-viewport lock and overflow suppression are the *special case*, layered
+ * on top inside a min-width query.
+ *
+ * Do not invert this. With the lock as the baseline and mobile as the
+ * exception, adding a designed mobile experience later means unpicking the
+ * viewport lock out of the application shell rather than writing styles.
+ */
+@media (min-width: 900px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+}

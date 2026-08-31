@@ -1,0 +1,49 @@
+/*
+ * Zone tokens.
+ *
+ * Every colour in the site resolves from one of these nine custom properties.
+ * They are switched by a single `data-zone` attribute on the application shell
+ * root — changing that one attribute recolours everything, and nothing else
+ * re-renders for colour.
+ *
+ * The one token deliberately outside the zone system is the soul red, which
+ * never recolours. It lives in base.css as a global.
+ *
+ * Values are the reconciled table from #72's Zone theming decisions.
+ */
+
+[data-zone='about'] {
+  --zone-bg: #0a0a0f;
+  --zone-panel: #16161f;
+  --zone-panel-deep: #000000;
+  --zone-ink: #f2f2f2;
+  --zone-body: #c8c8d2;
+  --zone-muted: #8a8a99;
+  --zone-accent: #ffd23f;
+  --zone-accent-2: #ff2e2e;
+  --zone-line: #1e1e28;
+}
+
+[data-zone='work'] {
+  --zone-bg: #1b1024;
+  --zone-panel: #2e1d40;
+  --zone-panel-deep: #120a19;
+  --zone-ink: #efe4f5;
+  --zone-body: #c4b3d6;
+  --zone-muted: #7a6890;
+  --zone-accent: #e8b44f;
+  --zone-accent-2: #c9a6f2;
+  --zone-line: #4a3560;
+}
+
+[data-zone='blog'] {
+  --zone-bg: #0d1725;
+  --zone-panel: #17263b;
+  --zone-panel-deep: #0a121c;
+  --zone-ink: #e8f1fa;
+  --zone-body: #c7d8ea;
+  --zone-muted: #5a7089;
+  --zone-accent: #ff9e3d;
+  --zone-accent-2: #4a9eff;
+  --zone-line: #22354d;
+}
