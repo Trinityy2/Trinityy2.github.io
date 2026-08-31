@@ -18,6 +18,10 @@
     return `${((index + 0.5) / zoneRoutes.length) * 100}%`
   }
 
+  /*
+   * Marked from the zone rather than from an exact URL match: the blog
+   * reader lives at /blog/<slug> and must still light the Blog node.
+   */
   const currentIndex = computed(() => zoneRoutes.findIndex((r) => r.zone === props.zone))
 
   const soulLeft = computed(() => centreOf(currentIndex.value))
@@ -53,6 +57,7 @@
         class="path__node"
         :class="`path__node--${nodeState(route.zone)}`"
         :to="route.path"
+        :aria-current="route.zone === zone ? 'page' : undefined"
         @mouseenter="hovered = route.zone"
         @mouseleave="hovered = null"
         @focus="hovered = route.zone"

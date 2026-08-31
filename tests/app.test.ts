@@ -504,3 +504,72 @@ describe('parsing a post', () => {
     )
   })
 })
+
+describe('the blog reader', () => {
+  it('renders a post in full at its own URL', async () => {
+    const app = await mountApp('/blog/the-older-one', {
+      posts: parsePosts([newerPost, olderPost]),
+    })
+
+    expect(app.vm.$route.path).toBe('/blog/the-older-one')
+    expect(app.find('.reader__title').text()).toBe('The Older One')
+    expect(app.text()).toContain('Body of the older post.')
+  })
+})
+
+describe('the blog reader, continued', () => {
+  it('maps to the Blog node in the header', async () => {
+    const app = await mountApp('/blog/the-older-one', {
+      posts: parsePosts([newerPost, olderPost]),
+    })
+
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('blog')
+    expect(app.find('[aria-label="Zones"] a[aria-current="page"]').text()).toContain('BLOG')
+  })
+
+  it('lists all entries, marking the one being read', async () => {
+    const app = await mountApp('/blog/the-older-one', {
+      posts: parsePosts([newerPost, olderPost]),
+    })
+
+    const entries = app.findAll('.reader__entry')
+    expect(entries).toHaveLength(2)
+    expect(app.text()).toContain('ALL ENTRIES · 2')
+    expect(app.find('.reader__entry--current .reader__entry-title').text()).toBe('The Older One')
+  })
+
+  it('links to the adjacent posts', async () => {
+    const app = await mountApp('/blog/the-older-one', {
+      posts: parsePosts([newerPost, olderPost]),
+    })
+
+    const adjacent = app.findAll('.reader__adjacent-link').map((l) => l.attributes('href'))
+    expect(adjacent).toEqual(['/blog/the-newer-one'])
+  })
+
+  it('omits the entry list and adjacent links entirely at a single post', async () => {
+    const app = await mountApp('/blog/the-newer-one', { posts: parsePosts([newerPost]) })
+
+    expect(app.find('.reader__title').text()).toBe('The Newer One')
+    expect(app.findAll('.reader__entry')).toHaveLength(0)
+    expect(app.findAll('.reader__adjacent-link')).toHaveLength(0)
+    expect(app.text()).not.toContain('ALL ENTRIES')
+  })
+
+  it('sends an unknown slug back to the landing rather than rendering blank', async () => {
+    const app = await mountApp('/blog/never-written', { posts: parsePosts([newerPost]) })
+    await flushRouter(app)
+
+    expect(app.vm.$route.path).toBe('/blog')
+  })
+
+  it('cannot open a draft', async () => {
+    const app = await mountApp('/blog/not-ready', {
+      posts: parsePosts([newerPost, draftPost]),
+    })
+    await flushRouter(app)
+
+    expect(app.vm.$route.path).toBe('/blog')
+    expect(app.text()).not.toContain('Not Ready')
+  })
+})

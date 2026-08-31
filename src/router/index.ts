@@ -4,6 +4,7 @@ import { zoneRoutes } from '@/data/zones'
 import type { Zone } from '@/types/zone'
 import AboutView from '@/views/AboutView.vue'
 import BlogView from '@/views/BlogView.vue'
+import PostView from '@/views/PostView.vue'
 import WorkView from '@/views/WorkView.vue'
 
 declare module 'vue-router' {
@@ -33,6 +34,16 @@ export function createAppRouter(history: RouterHistory): Router {
         component: VIEW_FOR_ZONE[route.zone],
         meta: { zone: route.zone },
       })),
+      /*
+       * The reader shares the Blog zone's theme and maps to the Blog node in
+       * the header, so it carries the same zone rather than a fourth one.
+       */
+      {
+        path: '/blog/:slug',
+        name: 'post',
+        component: PostView,
+        meta: { zone: 'blog' },
+      },
       /*
        * Anything unmatched goes to the root. The design contains no 404
        * screen and inventing one is scope; a visitor following a stale link
