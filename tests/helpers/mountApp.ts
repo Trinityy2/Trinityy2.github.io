@@ -28,11 +28,24 @@ export async function mountApp(initialPath = '/'): Promise<VueWrapper> {
 }
 
 /**
- * Let a navigation settle. Routing is asynchronous, so a keypress or a click
- * that triggers one needs the router's own promise to resolve before the
- * rendered result can be asserted on.
+ * Let a navigation settle.
+ *
+ * Navigation is held behind the zone transition until the overlay reports
+ * itself opaque, so a keypress or click does not change the route on its own.
+ * This drives the same `transitionend` the browser would fire, which resolves
+ * the gate immediately instead of waiting out its timeout fallback. The
+ * fallback path — a backgrounded tab, where the event never arrives — is
+ * covered separately with fake timers.
  */
 export async function flushRouter(wrapper: VueWrapper): Promise<void> {
+  // Let the guard start and attach its listener.
+  await flushPromises()
+  await wrapper.vm.$nextTick()
+
+  wrapper.find('[data-covering]').element.dispatchEvent(new Event('transitionend'))
+
+  await flushPromises()
+  await wrapper.vm.$nextTick()
   await wrapper.vm.$router.isReady()
   await flushPromises()
   await wrapper.vm.$nextTick()

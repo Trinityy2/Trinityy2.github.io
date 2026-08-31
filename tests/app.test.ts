@@ -1,3 +1,4 @@
+import { flushPromises } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { flushRouter, mountApp } from './helpers/mountApp'
@@ -239,5 +240,103 @@ describe('the Extras tab', () => {
     expect(text).toContain('LIKES')
     expect(text).toContain('DISLIKES')
     expect(text).toContain('* Mushrooms')
+  })
+})
+
+describe('the zone transition', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('does not resolve the route until the overlay is opaque', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    press('ArrowRight')
+    await flushPromises()
+    await app.vm.$nextTick()
+
+    // The overlay is fading down and the zone has NOT changed behind it.
+    expect(app.find('[data-covering]').attributes('data-covering')).toBe('true')
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('about')
+
+    // jsdom fires no transitionend, so this is the fallback doing the work —
+    // the same path a backgrounded tab takes.
+    await vi.advanceTimersByTimeAsync(250)
+    await flushRouter(app)
+
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('work')
+  })
+
+  it('lifts the overlay once the swap has happened', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    press('ArrowRight')
+    await vi.advanceTimersByTimeAsync(250)
+    await flushRouter(app)
+
+    expect(app.find('[data-covering]').attributes('data-covering')).toBe('false')
+  })
+})
+
+describe('the zone transition, continued', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+  })
+
+  it('resets entrance state, so nothing is mid-flight when the overlay lifts', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    await vi.advanceTimersByTimeAsync(5000)
+    await app.vm.$nextTick()
+    expect(app.text()).toContain('mostly harmless.')
+
+    press('ArrowRight')
+    await vi.advanceTimersByTimeAsync(250)
+    await flushRouter(app)
+    press('ArrowLeft')
+    await vi.advanceTimersByTimeAsync(250)
+    await flushRouter(app)
+
+    // Back in the void, the bio is typing again from the start rather than
+    // arriving already finished.
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('about')
+    expect(app.text()).not.toContain('mostly harmless.')
+  })
+
+  it('holds header clicks behind the same gate as arrow keys', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    await app.findAll('nav a')[2].trigger('click')
+    await flushPromises()
+    await app.vm.$nextTick()
+
+    expect(app.find('[data-covering]').attributes('data-covering')).toBe('true')
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('about')
+
+    await vi.advanceTimersByTimeAsync(250)
+    await flushRouter(app)
+
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('blog')
+  })
+
+  it('navigates instantly, and still completes, under reduced motion', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+    )
+    const app = await mountApp('/')
+
+    press('ArrowRight')
+    // No transitionend dispatched and no timers advanced: there is no fade to
+    // wait on, so the gate resolves on its own.
+    await flushPromises()
+    await app.vm.$nextTick()
+
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('work')
   })
 })

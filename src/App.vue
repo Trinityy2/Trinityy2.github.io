@@ -4,6 +4,7 @@
 
   import PathHeader from '@/components/PathHeader.vue'
   import { useArrowTravel } from '@/composables/useArrowTravel'
+  import { useZoneTransition } from '@/composables/useZoneTransition'
   import { zoneRoutes } from '@/data/zones'
 
   const route = useRoute()
@@ -17,6 +18,8 @@
   const zoneRoute = computed(() => zoneRoutes.find((r) => r.zone === zone.value) ?? zoneRoutes[0])
 
   useArrowTravel()
+
+  const { covering, epoch, overlay } = useZoneTransition()
 </script>
 
 <template>
@@ -24,18 +27,31 @@
     <PathHeader :zone="zone" />
 
     <main class="app-shell__stage">
-      <RouterView />
+      <!-- Keyed on the epoch so a zone remounts on every completed swap, and
+           its entrance state starts from zero rather than resuming. -->
+      <RouterView :key="epoch" />
     </main>
 
     <footer class="app-shell__footer">
       <span>{{ zoneRoute.title }}</span>
       <span>← → to travel</span>
     </footer>
+
+    <!-- The room transition. Full-bleed black, above everything, never
+         interactive. The zone swaps underneath it while it is opaque. -->
+    <div
+      ref="overlay"
+      class="app-shell__overlay"
+      :class="{ 'app-shell__overlay--covering': covering }"
+      :data-covering="String(covering)"
+      aria-hidden="true"
+    ></div>
   </div>
 </template>
 
 <style scoped>
   .app-shell {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -58,6 +74,29 @@
     border-top: var(--border-width) solid var(--zone-line);
     font-size: 11px;
     color: var(--zone-muted);
+  }
+
+  .app-shell__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    pointer-events: none;
+    opacity: 0;
+    /* Asymmetric by design: 200ms down, 160ms back up. */
+    transition: opacity 160ms linear;
+  }
+
+  .app-shell__overlay--covering {
+    opacity: 1;
+    transition: opacity 200ms linear;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-shell__overlay,
+    .app-shell__overlay--covering {
+      transition: none;
+    }
   }
 
   /* Desktop stage: locked to the viewport. See the inversion note in base.css. */
