@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { flushRouter, mountApp } from './helpers/mountApp'
 
@@ -123,5 +123,121 @@ describe('browser history', () => {
     app.vm.$router.back()
     await flushRouter(app)
     expect(app.find('[data-zone]').attributes('data-zone')).toBe('about')
+  })
+})
+
+describe('the About tabs', () => {
+  it('switches content in place, without navigating', async () => {
+    const app = await mountApp('/')
+
+    expect(app.text()).not.toContain('LANGUAGES')
+
+    await app.findAll('[role="tab"]')[1].trigger('click')
+
+    expect(app.text()).toContain('LANGUAGES')
+    expect(app.vm.$route.path).toBe('/')
+  })
+
+  it('marks the active tab as selected', async () => {
+    const app = await mountApp('/')
+
+    expect(app.find('[role="tab"][aria-selected="true"]').text()).toContain('BIO')
+
+    await app.findAll('[role="tab"]')[2].trigger('click')
+
+    expect(app.find('[role="tab"][aria-selected="true"]').text()).toContain('EXTRAS')
+  })
+})
+
+describe('the typed bio', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('types out over time rather than arriving complete', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    expect(app.text()).not.toContain('mostly harmless.')
+
+    await vi.advanceTimersByTimeAsync(5000)
+    await app.vm.$nextTick()
+
+    expect(app.text()).toContain('mostly harmless.')
+  })
+
+  it('retypes when the Bio tab is returned to', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/')
+
+    await vi.advanceTimersByTimeAsync(5000)
+    await app.vm.$nextTick()
+    expect(app.text()).toContain('mostly harmless.')
+
+    await app.findAll('[role="tab"]')[1].trigger('click')
+    await app.findAll('[role="tab"]')[0].trigger('click')
+
+    expect(app.text()).not.toContain('mostly harmless.')
+  })
+
+  it('renders complete and still when reduced motion is preferred', async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+    )
+
+    const app = await mountApp('/')
+
+    // No timers advanced: the visitor asked not to wait on an animation.
+    expect(app.text()).toContain('mostly harmless.')
+
+    vi.unstubAllGlobals()
+  })
+})
+
+describe('the stat panel', () => {
+  it("shows the profile's real LV, HP and year", async () => {
+    const app = await mountApp('/')
+    const stats = app.find('dl').text()
+
+    expect(stats).toContain('31')
+    expect(stats).toContain('20 / 20')
+    expect(stats).toContain('2019')
+  })
+})
+
+describe('the Skills tab', () => {
+  it('renders the three groups with bars proportional to the data', async () => {
+    const app = await mountApp('/')
+    await app.findAll('[role="tab"]')[1].trigger('click')
+
+    const groups = app.findAll('.skills__group-name').map((g) => g.text())
+    expect(groups).toEqual(['LANGUAGES', 'FRAMEWORKS', 'INFRASTRUCTURE'])
+
+    const barFor = (name: string) =>
+      app
+        .findAll('.skills__entry')
+        .find((entry) => entry.text().startsWith(name))
+        ?.find('.skills__bar-fill')
+        .attributes('style')
+
+    // Ten years of Git fills the bar; two years of Golang fills a fifth of it.
+    expect(barFor('Git')).toBe('width: 100%;')
+    expect(barFor('Golang')).toBe('width: 20%;')
+  })
+})
+
+describe('the Extras tab', () => {
+  it('renders hobby cards, likes and dislikes', async () => {
+    const app = await mountApp('/')
+    await app.findAll('[role="tab"]')[2].trigger('click')
+
+    const text = app.text()
+    expect(text).toContain('SKATING')
+    expect(text).toContain('ATK 5 · DEF 2')
+    expect(text).toContain('LIKES')
+    expect(text).toContain('DISLIKES')
+    expect(text).toContain('* Mushrooms')
   })
 })

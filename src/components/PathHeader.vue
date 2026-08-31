@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
 
+  import SoulHeart from '@/components/SoulHeart.vue'
   import { zoneRoutes } from '@/data/zones'
   import type { Zone } from '@/types/zone'
 
@@ -42,7 +43,7 @@
       <div class="path__line" aria-hidden="true"></div>
 
       <div class="path__soul" :style="{ left: soulLeft }" aria-hidden="true">
-        <div class="path__heart"></div>
+        <SoulHeart pulse />
         <div class="path__soul-shadow"></div>
       </div>
 
@@ -118,40 +119,6 @@
     gap: 9px;
     /* The soul travels along the path rather than teleporting to the node. */
     transition: left 480ms cubic-bezier(0.3, 0.8, 0.3, 1);
-  }
-
-  .path__heart {
-    width: 16px;
-    height: 14px;
-    /* The soul is drawn, not imaged, so it scales cleanly and never recolours. */
-    background: var(--soul-red);
-    clip-path: polygon(
-      12.5% 0%,
-      37.5% 0%,
-      37.5% 16.7%,
-      62.5% 16.7%,
-      62.5% 0%,
-      87.5% 0%,
-      87.5% 16.7%,
-      100% 16.7%,
-      100% 50%,
-      87.5% 50%,
-      87.5% 66.7%,
-      75% 66.7%,
-      75% 83.3%,
-      62.5% 83.3%,
-      62.5% 100%,
-      37.5% 100%,
-      37.5% 83.3%,
-      25% 83.3%,
-      25% 66.7%,
-      12.5% 66.7%,
-      12.5% 50%,
-      0% 50%,
-      0% 16.7%,
-      12.5% 16.7%
-    );
-    animation: heart-pulse 1.6s ease-in-out infinite;
   }
 
   .path__soul-shadow {
@@ -240,16 +207,6 @@
     opacity: 0;
   }
 
-  @keyframes heart-pulse {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.14);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .path,
     .path__line,
@@ -257,10 +214,6 @@
     .path__save-point,
     .path__label {
       transition: none;
-    }
-
-    .path__heart {
-      animation: none;
     }
 
     .preview-enter-active,

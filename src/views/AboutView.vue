@@ -1,22 +1,68 @@
 <script setup lang="ts">
+  import { ref } from 'vue'
+
   import PixelAvatar from '@/components/PixelAvatar.vue'
+  import SoulHeart from '@/components/SoulHeart.vue'
+  import BioTab from '@/components/about/BioTab.vue'
+  import ExtrasTab from '@/components/about/ExtrasTab.vue'
+  import SkillsTab from '@/components/about/SkillsTab.vue'
+  import StatPanel from '@/components/about/StatPanel.vue'
   import { profile } from '@/data/profile'
+
+  const TABS = [
+    { id: 'bio', label: 'BIO' },
+    { id: 'skills', label: 'SKILLS' },
+    { id: 'extras', label: 'EXTRAS' },
+  ] as const
+
+  type TabId = (typeof TABS)[number]['id']
+
+  /**
+   * Tab state deliberately has no URL representation. Nobody links to a tab,
+   * and putting it in the URL would turn every click into a history entry.
+   */
+  const tab = ref<TabId>('bio')
 </script>
 
 <template>
   <section class="about">
-    <div class="about__layout">
-      <div class="about__sprite">
-        <PixelAvatar zone="about" />
-      </div>
+    <div class="about__stage">
+      <div class="about__layout">
+        <div class="about__sprite">
+          <PixelAvatar zone="about" />
+          <StatPanel :stats="profile.stats" />
+        </div>
 
-      <div class="about__identity">
-        <h1 class="about__name">{{ profile.name }}</h1>
-        <div class="about__badges">
-          <span class="about__handle">{{ profile.handle }}</span>
-          <p class="about__meta">{{ profile.role }} · {{ profile.location }}</p>
+        <div class="about__identity">
+          <h1 class="about__name">{{ profile.name }}</h1>
+          <div class="about__badges">
+            <span class="about__handle">{{ profile.handle }}</span>
+            <p class="about__meta">{{ profile.role }} · {{ profile.location }}</p>
+          </div>
+
+          <div class="about__panel" role="tabpanel">
+            <BioTab v-if="tab === 'bio'" />
+            <SkillsTab v-else-if="tab === 'skills'" />
+            <ExtrasTab v-else />
+          </div>
         </div>
       </div>
+    </div>
+
+    <div class="about__tabs" role="tablist" aria-label="About sections">
+      <button
+        v-for="entry in TABS"
+        :key="entry.id"
+        class="about__tab"
+        :class="{ 'about__tab--active': tab === entry.id }"
+        type="button"
+        role="tab"
+        :aria-selected="tab === entry.id"
+        @click="tab = entry.id"
+      >
+        <SoulHeart v-if="tab === entry.id" class="about__tab-soul" />
+        {{ entry.label }}
+      </button>
     </div>
   </section>
 </template>
@@ -25,9 +71,15 @@
   .about {
     flex: 1;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .about__stage {
+    flex: 1;
+    display: flex;
     justify-content: center;
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-4) var(--space-3) 0;
   }
 
   .about__layout {
@@ -41,6 +93,9 @@
 
   .about__sprite {
     flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .about__identity {
@@ -49,6 +104,7 @@
        instead of pushing the document sideways. */
     min-width: 0;
     max-width: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -85,15 +141,62 @@
     color: var(--zone-muted);
   }
 
-  /*
-   * Desktop: the designed side-by-side layout. Below this the sprite sits
-   * above the text so the text column is not crushed — the mobile fallback is
-   * functional, not designed.
-   */
+  .about__panel {
+    margin-top: 18px;
+    text-align: left;
+  }
+
+  .about__tabs {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .about__tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px;
+    background: transparent;
+    border: var(--border-width) solid var(--zone-muted);
+    color: var(--zone-muted);
+    font-family: var(--font-display);
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+      border-color 160ms linear,
+      color 160ms linear,
+      background 160ms linear;
+  }
+
+  .about__tab--active {
+    border-color: var(--zone-accent);
+    color: var(--zone-accent);
+    background: var(--zone-panel);
+  }
+
+  .about__tab-soul {
+    --soul-width: 14px;
+    --soul-height: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about__tab {
+      transition: none;
+    }
+  }
+
   @media (min-width: 900px) {
-    .about {
-      align-items: center;
-      padding: var(--space-4) var(--space-6);
+    .about__stage {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 30px 60px 0;
     }
 
     .about__layout {
@@ -102,17 +205,22 @@
       gap: var(--space-5);
     }
 
-    .about__name {
-      font-size: 38px;
-    }
-
     .about__identity {
       flex: 1;
       text-align: left;
     }
 
+    .about__name {
+      font-size: 38px;
+    }
+
     .about__badges {
       justify-content: flex-start;
+    }
+
+    .about__tabs {
+      grid-template-columns: repeat(3, 1fr);
+      padding: 20px 60px 24px;
     }
   }
 </style>
