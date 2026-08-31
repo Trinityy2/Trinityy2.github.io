@@ -51,3 +51,13 @@ export const zoneRoutes: readonly ZoneRoute[] = [
     previewMeta: 'POSTS · LONGER THOUGHTS',
   },
 ]
+
+/** Where a zone sits in travel order, or -1 if it is not a zone. */
+export function zoneIndexOf(zone: Zone): number {
+  return zoneRoutes.findIndex((route) => route.zone === zone)
+}
+
+/** The route entry for a zone, falling back to the first zone. */
+export function zoneRouteFor(zone: Zone): ZoneRoute {
+  return zoneRoutes.find((route) => route.zone === zone) ?? zoneRoutes[0]
+}

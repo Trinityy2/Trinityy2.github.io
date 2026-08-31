@@ -1,6 +1,6 @@
 import { onUnmounted, ref, type Ref } from 'vue'
 
-import { prefersReducedMotion } from './usePrefersReducedMotion'
+import { prefersReducedMotion } from './prefersReducedMotion'
 
 /** Matches the design prototype's typing speed. */
 const CHARACTER_INTERVAL_MS = 26

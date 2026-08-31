@@ -25,6 +25,15 @@ export interface SkillCallout {
  */
 export const DEEP_EXPERIENCE_YEARS = 3
 
+/** Whether an entry counts as depth rather than passing familiarity. */
+export function isDeep(skill: Skill): boolean {
+  return skill.years >= DEEP_EXPERIENCE_YEARS
+}
+
+export function yearsLabel(skill: Skill): string {
+  return `${skill.years} ${skill.years === 1 ? 'YR' : 'YRS'}`
+}
+
 export const skillGroups: readonly SkillGroup[] = [
   {
     name: 'LANGUAGES',

@@ -1,5 +1,6 @@
 import { createRouter, type Router, type RouterHistory } from 'vue-router'
 
+import type { SiteContent } from '@/content'
 import { zoneRoutes } from '@/data/zones'
 import type { Zone } from '@/types/zone'
 import AboutView from '@/views/AboutView.vue'
@@ -23,9 +24,14 @@ const VIEW_FOR_ZONE = {
 /**
  * The history is a parameter so tests can supply an in-memory one. Production
  * passes a web history; the app seam test passes `createMemoryHistory()`.
+ *
+ * The content is a parameter for a narrower reason: the router needs to know
+ * which post slugs exist in order to turn away the ones that do not, and it
+ * has to know before the *first* navigation resolves. A check inside the
+ * reader would be too late — the empty stage would already have painted.
  */
-export function createAppRouter(history: RouterHistory): Router {
-  return createRouter({
+export function createAppRouter(history: RouterHistory, content: SiteContent): Router {
+  const router = createRouter({
     history,
     routes: [
       ...zoneRoutes.map((route) => ({
@@ -52,4 +58,18 @@ export function createAppRouter(history: RouterHistory): Router {
       { path: '/:pathMatch(.*)*', redirect: '/' },
     ],
   })
+
+  router.beforeEach((to) => {
+    if (to.name !== 'post') return true
+    if (content.posts.some((post) => post.slug === to.params.slug)) return true
+
+    /*
+     * A stale link, or a draft someone remembers. Drafts take this path too:
+     * they never leave `parsePosts`, so asking for one by URL is
+     * indistinguishable from asking for a post that never existed.
+     */
+    return { path: '/blog', replace: true }
+  })
+
+  return router
 }

@@ -1,6 +1,7 @@
 import { inject, type InjectionKey } from 'vue'
 
 import { experience as bundledExperience, type Experience } from '@/data/experience'
+import { skillGroups as bundledSkillGroups, type SkillGroup } from '@/data/skills'
 import { bundledPosts } from '@/posts/bundled'
 import type { Post } from '@/posts/parsePosts'
 
@@ -17,6 +18,7 @@ import type { Post } from '@/posts/parsePosts'
  */
 export interface SiteContent {
   experience: readonly Experience[]
+  skillGroups: readonly SkillGroup[]
   posts: readonly Post[]
 }
 
@@ -25,6 +27,7 @@ export const SITE_CONTENT: InjectionKey<SiteContent> = Symbol('site-content')
 /** The real, bundled content. Also the default when nothing is provided. */
 export const bundledContent: SiteContent = {
   experience: bundledExperience,
+  skillGroups: bundledSkillGroups,
   posts: bundledPosts,
 }
 

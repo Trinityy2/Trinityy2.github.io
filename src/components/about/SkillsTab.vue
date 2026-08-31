@@ -1,21 +1,8 @@
 <script setup lang="ts">
-  import {
-    DEEP_EXPERIENCE_YEARS,
-    skillCallout,
-    skillGroups,
-    skillsPreamble,
-    type Skill,
-  } from '@/data/skills'
+  import { useSiteContent } from '@/content'
+  import { isDeep, skillCallout, skillsPreamble, yearsLabel } from '@/data/skills'
 
-  /** Below the depth threshold an entry renders muted, so a reader can tell
-   * deep experience from passing familiarity without reading the numbers. */
-  function isDeep(skill: Skill): boolean {
-    return skill.years >= DEEP_EXPERIENCE_YEARS
-  }
-
-  function yearsLabel(skill: Skill): string {
-    return `${skill.years} ${skill.years === 1 ? 'YR' : 'YRS'}`
-  }
+  const { skillGroups } = useSiteContent()
 </script>
 
 <template>

@@ -36,7 +36,7 @@
             <PostCard v-for="post in recent" :key="post.slug" :post="post" />
           </div>
 
-          <RouterLink class="blog__enter" :to="`/blog/${latest.slug}`">
+          <RouterLink class="pixel-button blog__enter" :to="`/blog/${latest.slug}`">
             GO TO THE BLOG →
           </RouterLink>
         </template>
@@ -96,17 +96,8 @@
 
   .blog__enter {
     align-self: flex-end;
-    border: var(--border-width) solid var(--zone-accent);
-    color: var(--zone-accent);
-    font-family: var(--font-display);
     font-size: 12px;
     padding: 13px 26px;
-    text-decoration: none;
-  }
-
-  .blog__enter:hover {
-    background: var(--zone-accent);
-    color: var(--zone-bg);
   }
 
   .blog__avatar {

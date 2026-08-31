@@ -16,7 +16,10 @@ export async function mountApp(
   initialPath = '/',
   content: Partial<SiteContent> = {}
 ): Promise<VueWrapper> {
-  const router = createAppRouter(createMemoryHistory())
+  // One content object for both the router and the app, so the guard that
+  // turns away unknown slugs sees exactly what the views see.
+  const siteContent: SiteContent = { ...bundledContent, ...content }
+  const router = createAppRouter(createMemoryHistory(), siteContent)
 
   await router.push(initialPath)
   await router.isReady()
@@ -26,7 +29,7 @@ export async function mountApp(
       plugins: [router],
       // Only the keys a test names are overridden; the rest stay the real
       // bundled content, so a test opts in to fixtures rather than out.
-      provide: { [SITE_CONTENT as symbol]: { ...bundledContent, ...content } },
+      provide: { [SITE_CONTENT as symbol]: siteContent },
     },
     attachTo: document.body,
   })

@@ -1,28 +1,19 @@
 <script setup lang="ts">
   import { marked } from 'marked'
-  import { computed, watchEffect } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
+  import { computed } from 'vue'
+  import { useRoute } from 'vue-router'
 
   import { useSiteContent } from '@/content'
 
   const route = useRoute()
-  const router = useRouter()
   const { posts } = useSiteContent()
 
   const slug = computed(() => String(route.params.slug))
   const index = computed(() => posts.findIndex((post) => post.slug === slug.value))
   const post = computed(() => posts[index.value])
 
-  /**
-   * A slug with no post behind it — a stale link, or a draft someone
-   * remembers — goes back to the landing rather than rendering an empty
-   * article. The design contains no 404 screen.
-   */
-  watchEffect(() => {
-    if (index.value === -1) {
-      void router.replace('/blog')
-    }
-  })
+  // A slug with no post behind it never reaches here: `useUnknownPostRedirect`
+  // corrects it in a router guard, before this view mounts.
 
   /** Posts sort newest first, so the *next* one along is the older one. */
   const older = computed(() => posts[index.value + 1])
@@ -37,10 +28,11 @@
 <template>
   <section v-if="post" class="reader">
     <div class="reader__layout">
-      <aside v-if="showsEntries" class="reader__entries">
-        <RouterLink class="reader__back" to="/blog">← BACK TO THE THOUGHTS</RouterLink>
+      <aside class="reader__entries">
+        <RouterLink class="pixel-button" to="/blog">← BACK TO THE THOUGHTS</RouterLink>
 
-        <p class="reader__entries-count">ALL ENTRIES · {{ posts.length }}</p>
+        <template v-if="showsEntries">
+          <p class="reader__entries-count">ALL ENTRIES · {{ posts.length }}</p>
 
         <nav class="reader__entry-list" aria-label="All entries">
           <RouterLink
@@ -52,16 +44,13 @@
             :aria-current="entry.slug === post.slug ? 'page' : undefined"
           >
             <span class="reader__entry-title">{{ entry.title }}</span>
-            <span class="reader__entry-date">{{ entry.date }}</span>
-          </RouterLink>
-        </nav>
+              <span class="reader__entry-date">{{ entry.date }}</span>
+            </RouterLink>
+          </nav>
+        </template>
       </aside>
 
       <article class="reader__article">
-        <RouterLink v-if="!showsEntries" class="reader__back" to="/blog">
-          ← BACK TO THE THOUGHTS
-        </RouterLink>
-
         <header class="reader__head">
           <p class="reader__meta">
             {{ post.date }} · {{ post.readingMinutes }} MIN · {{ post.category }}
@@ -111,21 +100,6 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-  }
-
-  .reader__back {
-    border: var(--border-width) solid var(--zone-accent);
-    color: var(--zone-accent);
-    font-family: var(--font-display);
-    font-size: 11px;
-    padding: 11px 14px;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .reader__back:hover {
-    background: var(--zone-accent);
-    color: var(--zone-bg);
   }
 
   .reader__entries-count {
@@ -243,11 +217,6 @@
     text-decoration: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .reader__entry {
-      transition: none;
-    }
-  }
 
   @media (min-width: 900px) {
     .reader {

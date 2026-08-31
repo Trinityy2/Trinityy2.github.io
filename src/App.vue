@@ -5,7 +5,7 @@
   import PathHeader from '@/components/PathHeader.vue'
   import { useArrowTravel } from '@/composables/useArrowTravel'
   import { useZoneTransition } from '@/composables/useZoneTransition'
-  import { zoneRoutes } from '@/data/zones'
+  import { zoneRouteFor } from '@/data/zones'
 
   const route = useRoute()
 
@@ -15,7 +15,7 @@
    */
   const zone = computed(() => route.meta.zone ?? 'about')
 
-  const zoneRoute = computed(() => zoneRoutes.find((r) => r.zone === zone.value) ?? zoneRoutes[0])
+  const zoneRoute = computed(() => zoneRouteFor(zone.value))
 
   useArrowTravel()
 
@@ -80,7 +80,7 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: #000;
+    background: var(--transition-black);
     pointer-events: none;
     opacity: 0;
     /* Asymmetric by design: 200ms down, 160ms back up. */
@@ -90,13 +90,6 @@
   .app-shell__overlay--covering {
     opacity: 1;
     transition: opacity 200ms linear;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .app-shell__overlay,
-    .app-shell__overlay--covering {
-      transition: none;
-    }
   }
 
   /* Desktop stage: locked to the viewport. See the inversion note in base.css. */

@@ -62,9 +62,4 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .soul--pulse {
-      animation: none;
-    }
-  }
 </style>

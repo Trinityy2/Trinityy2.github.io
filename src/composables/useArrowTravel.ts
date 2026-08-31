@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { zoneRoutes } from '@/data/zones'
+import { zoneIndexOf, zoneRoutes } from '@/data/zones'
 
 const STEP_FOR_KEY: Record<string, number | undefined> = {
   ArrowLeft: -1,
@@ -17,7 +17,7 @@ export function useArrowTravel(): void {
     const step = STEP_FOR_KEY[event.key]
     if (step === undefined) return
 
-    const from = zoneRoutes.findIndex((r) => r.zone === route.meta.zone)
+    const from = zoneIndexOf(route.meta.zone)
     const to = from + step
 
     /*

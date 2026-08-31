@@ -230,6 +230,20 @@ describe('the Skills tab', () => {
     expect(barFor('Git')).toBe('width: 100%;')
     expect(barFor('Golang')).toBe('width: 20%;')
   })
+
+  it('fills the bar from the authored weight rather than from the years', async () => {
+    const app = await mountApp('/', {
+      skillGroups: [
+        { name: 'LANGUAGES', skills: [{ name: 'Rare Thing', years: 2, weight: 90 }] },
+      ],
+    })
+    await app.findAll('[role="tab"]')[1].trigger('click')
+
+    // Two years, but a bar nine-tenths full. Every entry in the real data
+    // happens to have weight === years x 10, so without a fixture where the
+    // two disagree this assertion could not tell them apart.
+    expect(app.find('.skills__bar-fill').attributes('style')).toBe('width: 90%;')
+  })
 })
 
 describe('the Extras tab', () => {
@@ -437,10 +451,18 @@ describe('stepping through encounters', () => {
 })
 
 describe('the bundled career history', () => {
-  it('marks every placeholder entry as needing replacement', async () => {
+  it('marks every placeholder entry, not just the first', async () => {
     const app = await mountApp('/work')
+    const total = app.findAll('.work__dot').length
+    const next = app.findAll('button')[1]
 
-    expect(app.text()).toContain('PLACEHOLDER')
+    expect(total).toBeGreaterThan(1)
+
+    // Only one entry shows at a time, so the whole list has to be walked.
+    for (let seen = 0; seen < total; seen += 1) {
+      expect(app.text()).toContain('PLACEHOLDER')
+      if (seen < total - 1) await next.trigger('click')
+    }
   })
 })
 
@@ -571,5 +593,35 @@ describe('the blog reader, continued', () => {
 
     expect(app.vm.$route.path).toBe('/blog')
     expect(app.text()).not.toContain('Not Ready')
+  })
+})
+
+describe('travelling faster than the transition', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('keeps the screen covered when one navigation supersedes another', async () => {
+    vi.useFakeTimers()
+    const app = await mountApp('/work')
+
+    press('ArrowRight')
+    await vi.advanceTimersByTimeAsync(100)
+    // A second press before the first has resolved. vue-router reports the
+    // first as cancelled; the overlay must not lift on that.
+    press('ArrowLeft')
+
+    await vi.advanceTimersByTimeAsync(170)
+    await app.vm.$nextTick()
+
+    // The first navigation has just been cancelled. The second is still held.
+    expect(app.find('[data-covering]').attributes('data-covering')).toBe('true')
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('work')
+
+    await vi.advanceTimersByTimeAsync(300)
+    await flushRouter(app)
+
+    expect(app.find('[data-zone]').attributes('data-zone')).toBe('about')
+    expect(app.find('[data-covering]').attributes('data-covering')).toBe('false')
   })
 })

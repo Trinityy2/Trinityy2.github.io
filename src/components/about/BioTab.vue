@@ -71,9 +71,4 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .bio__caret {
-      animation: none;
-    }
-  }
 </style>

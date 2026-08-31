@@ -186,11 +186,6 @@
     --soul-height: 12px;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .about__tab {
-      transition: none;
-    }
-  }
 
   @media (min-width: 900px) {
     .about__stage {

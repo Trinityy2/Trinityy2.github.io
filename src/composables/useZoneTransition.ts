@@ -1,7 +1,7 @@
 import { nextTick, onUnmounted, ref, type Ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, type RouteLocationNormalized } from 'vue-router'
 
-import { prefersReducedMotion } from './usePrefersReducedMotion'
+import { prefersReducedMotion } from './prefersReducedMotion'
 
 /**
  * How long to wait for the overlay to report itself opaque before giving up
@@ -73,27 +73,53 @@ export function useZoneTransition(): ZoneTransition {
     })
   }
 
-  const removeBeforeEach = router.beforeEach(async (to, from) => {
-    // Nothing to cover on the first paint, and nothing to fade from.
-    if (from.matched.length === 0) return true
-    if (to.fullPath === from.fullPath) return true
+  /**
+   * Which navigations are travel, and so worth a room transition.
+   *
+   * Not the first paint: there is nothing to cover and nothing to fade from.
+   * Not a change of parameter within the same route either — moving between
+   * two posts inside the reader is turning a page, not walking to another
+   * room, and blacking the screen out for it would be absurd.
+   */
+  function isTravel(to: RouteLocationNormalized, from: RouteLocationNormalized): boolean {
+    return from.matched.length > 0 && to.name !== from.name
+  }
 
+  /**
+   * How many held navigations are outstanding.
+   *
+   * Needed because a second navigation supersedes the first, and vue-router
+   * reports the first as *cancelled*. Lifting the overlay on that failure
+   * would uncover the screen while the newer navigation is still held behind
+   * its own gate — the swap would then happen in plain sight, which is the
+   * one thing this whole mechanism exists to prevent.
+   */
+  let inFlight = 0
+
+  const removeBeforeEach = router.beforeEach(async (to, from) => {
+    if (!isTravel(to, from)) return true
+
+    inFlight += 1
     covering.value = true
     await whenOpaque()
 
     return true
   })
 
-  const removeAfterEach = router.afterEach((_to, _from, failure) => {
+  const removeAfterEach = router.afterEach((to, from, failure) => {
+    if (isTravel(to, from)) {
+      inFlight = Math.max(0, inFlight - 1)
+    }
+
     if (failure) {
-      // An aborted navigation must not leave the screen black forever.
-      covering.value = false
+      // Only safe to uncover once nothing newer is still waiting behind it.
+      if (inFlight === 0) covering.value = false
       return
     }
 
     epoch.value += 1
     void nextTick(() => {
-      covering.value = false
+      if (inFlight === 0) covering.value = false
     })
   })
 

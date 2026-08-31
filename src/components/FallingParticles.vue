@@ -6,7 +6,7 @@
    * the effect is identical on every visit and in every render — there is no
    * state here, and nothing to reset when a zone remounts.
    */
-  withDefaults(defineProps<{ kind?: 'leaf' | 'snow' }>(), { kind: 'leaf' })
+  defineProps<{ kind: 'leaf' | 'snow' }>()
 
   const PARTICLES = [
     { left: '8%', size: 9, duration: 10, delay: 0, tone: 'accent' },

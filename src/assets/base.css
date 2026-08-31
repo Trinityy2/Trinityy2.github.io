@@ -5,8 +5,14 @@
  */
 
 :root {
-  /* The one colour outside the zone system. The soul never recolours. */
+  /*
+   * The two colours outside the zone system, both because they must not
+   * change with the zone: the soul, which is always the same red, and the
+   * black the room transition fades through, which would not read as a
+   * blackout if it were tinted by the room being left.
+   */
   --soul-red: #ff2e2e;
+  --transition-black: #000;
 
   --font-display: 'Silkscreen', monospace;
   --font-body: 'IBM Plex Mono', monospace;
@@ -87,5 +93,46 @@ a:hover {
   body {
     height: 100%;
     overflow: hidden;
+  }
+}
+
+/*
+ * The design has one button shape: a 3px accent outline that inverts on
+ * hover. It is global because several call sites had each grown their own
+ * copy of it. Components add their own modifiers on top where they need
+ * states the base shape does not have.
+ */
+.pixel-button {
+  display: inline-block;
+  border: var(--border-width) solid var(--zone-accent);
+  color: var(--zone-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  padding: 11px 18px;
+  text-align: center;
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pixel-button:hover {
+  background: var(--zone-accent);
+  color: var(--zone-bg);
+}
+
+/*
+ * One reduced-motion rule for the whole site, rather than a block in every
+ * component. Durations collapse instead of being removed, so transitionend
+ * still fires and anything waiting on it — the room transition's gate —
+ * still resolves.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

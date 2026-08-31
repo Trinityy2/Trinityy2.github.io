@@ -2,7 +2,7 @@
   import { computed, ref } from 'vue'
 
   import SoulHeart from '@/components/SoulHeart.vue'
-  import { zoneRoutes } from '@/data/zones'
+  import { zoneIndexOf, zoneRoutes } from '@/data/zones'
   import type { Zone } from '@/types/zone'
 
   const props = defineProps<{ zone: Zone }>()
@@ -22,7 +22,7 @@
    * Marked from the zone rather than from an exact URL match: the blog
    * reader lives at /blog/<slug> and must still light the Blog node.
    */
-  const currentIndex = computed(() => zoneRoutes.findIndex((r) => r.zone === props.zone))
+  const currentIndex = computed(() => zoneIndexOf(props.zone))
 
   const soulLeft = computed(() => centreOf(currentIndex.value))
 
@@ -30,9 +30,13 @@
   const previewed = computed(() => zoneRoutes.find((r) => r.zone === hovered.value) ?? null)
 
   const previewLeft = computed(() => {
-    const index = zoneRoutes.findIndex((r) => r.zone === hovered.value)
+    const index = hovered.value === null ? -1 : zoneIndexOf(hovered.value)
     return centreOf(index === -1 ? currentIndex.value : index)
   })
+
+  /** The road runs between the first and last node centres, wherever those
+   * fall — so it still reaches end to end if a zone is ever added. */
+  const lineInset = computed(() => centreOf(0))
 
   function nodeState(zone: Zone): 'current' | 'hovered' | 'idle' {
     if (zone === props.zone) return 'current'
@@ -44,7 +48,11 @@
 <template>
   <header class="path">
     <nav class="path__route" aria-label="Zones">
-      <div class="path__line" aria-hidden="true"></div>
+      <div
+        class="path__line"
+        :style="{ left: lineInset, right: lineInset }"
+        aria-hidden="true"
+      ></div>
 
       <div class="path__soul" :style="{ left: soulLeft }" aria-hidden="true">
         <SoulHeart pulse />
@@ -106,8 +114,6 @@
   .path__line {
     position: absolute;
     z-index: 0;
-    left: 16.6%;
-    right: 16.6%;
     top: 29px;
     border-top: var(--border-width) dashed var(--zone-line);
     transition: border-color 420ms linear;
@@ -212,20 +218,6 @@
     opacity: 0;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .path,
-    .path__line,
-    .path__soul,
-    .path__save-point,
-    .path__label {
-      transition: none;
-    }
-
-    .preview-enter-active,
-    .preview-leave-active {
-      transition: none;
-    }
-  }
 
   @media (min-width: 900px) {
     .path {

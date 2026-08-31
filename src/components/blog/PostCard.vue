@@ -38,9 +38,4 @@
     color: var(--zone-muted);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .post-card {
-      transition: none;
-    }
-  }
 </style>

@@ -196,12 +196,6 @@
     color: var(--zone-muted);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .work__step,
-    .work__dot {
-      transition: none;
-    }
-  }
 
   @media (min-width: 900px) {
     .work {
