@@ -450,8 +450,22 @@ describe('stepping through encounters', () => {
   })
 })
 
-describe('the bundled career history', () => {
-  it('marks every placeholder entry, not just the first', async () => {
+describe('placeholder career entries', () => {
+  it('marks a placeholder entry and leaves real ones unmarked', async () => {
+    const [stub, real] = encounters(2)
+    const app = await mountApp('/work', {
+      experience: [{ ...stub, placeholder: true }, real],
+    })
+
+    expect(app.text()).toContain('PLACEHOLDER')
+
+    await app.findAll('button')[1].trigger('click')
+
+    expect(app.text()).toContain('ROLE 2')
+    expect(app.text()).not.toContain('PLACEHOLDER')
+  })
+
+  it('ships real history, with no placeholder left anywhere in it', async () => {
     const app = await mountApp('/work')
     const total = app.findAll('.work__dot').length
     const next = app.findAll('button')[1]
@@ -460,7 +474,7 @@ describe('the bundled career history', () => {
 
     // Only one entry shows at a time, so the whole list has to be walked.
     for (let seen = 0; seen < total; seen += 1) {
-      expect(app.text()).toContain('PLACEHOLDER')
+      expect(app.text()).not.toContain('PLACEHOLDER')
       if (seen < total - 1) await next.trigger('click')
     }
   })
