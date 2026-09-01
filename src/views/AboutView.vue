@@ -34,10 +34,12 @@
         </div>
 
         <div class="about__identity">
-          <h1 class="about__name">{{ profile.name }}</h1>
-          <div class="about__badges">
-            <span class="about__handle">{{ profile.handle }}</span>
-            <p class="about__meta">{{ profile.role }} · {{ profile.location }}</p>
+          <div class="about__masthead">
+            <h1 class="about__name">{{ profile.name }}</h1>
+            <div class="about__badges">
+              <span class="about__handle">{{ profile.handle }}</span>
+              <p class="about__meta">{{ profile.role }} · {{ profile.location }}</p>
+            </div>
           </div>
 
           <div class="about__panel" role="tabpanel">
@@ -107,8 +109,19 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
     text-align: center;
+  }
+
+  /*
+   * The masthead is the part that must not move. It is a separate element
+   * from the panel below it so that the two have independent heights: the
+   * panel's content changes with the tab, and nothing above it should notice.
+   */
+  .about__masthead {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
   }
 
   .about__name {
@@ -144,6 +157,21 @@
   .about__panel {
     margin-top: 18px;
     text-align: left;
+  }
+
+  /*
+   * Reserve the height of the tallest tab.
+   *
+   * Without this, vertically centring the stage means the masthead and the
+   * sprite drift up and down as the visitor switches tabs, because the block
+   * being centred changes height under them. 344px was measured against all
+   * three tabs across the desktop range: the worst case is 342px, at the
+   * 900px breakpoint where the skills grid is most cramped.
+   */
+  @media (min-width: 900px) {
+    .about__panel {
+      min-height: 344px;
+    }
   }
 
   .about__tabs {
@@ -198,6 +226,12 @@
       flex-direction: row;
       align-items: flex-start;
       gap: var(--space-5);
+      /*
+       * Vertical centring by auto margin rather than `align-items: center`.
+       * A centred flex item whose content overflows its container cannot be
+       * scrolled back to its own top edge; auto margins centre without that.
+       */
+      margin-block: auto;
     }
 
     .about__identity {
