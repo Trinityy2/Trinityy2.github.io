@@ -2,17 +2,32 @@
   /**
    * Zone ambience: a handful of pixels drifting down the screen.
    *
-   * Positions, sizes, durations and delays are fixed rather than random so
+   * Positions, sizes, durations and offsets are fixed rather than random so
    * the effect is identical on every visit and in every render — there is no
    * state here, and nothing to reset when a zone remounts.
    */
   defineProps<{ kind: 'leaf' | 'snow' }>()
 
+  /**
+   * `offset` is a **negative** animation delay, and must stay negative.
+   *
+   * A positive delay parks the element at its pre-animation state for the
+   * duration of the delay — visibly, at full opacity, at the top of the zone.
+   * Since a zone remounts on every arrival, that showed up as a handful of
+   * static dots pinned to the top edge for up to three seconds after every
+   * transition, before they abruptly began to fall.
+   *
+   * A negative delay instead starts the animation part-way through, so each
+   * particle is already mid-fall on the very first frame. The offsets below
+   * put the four at roughly a quarter, a half, two thirds and four fifths of
+   * the way through their own cycles, which spreads them down the screen
+   * immediately rather than releasing them in a clump.
+   */
   const PARTICLES = [
-    { left: '8%', size: 9, duration: 10, delay: 0, tone: 'accent' },
-    { left: '29%', size: 7, duration: 12.5, delay: 2.1, tone: 'accent-2' },
-    { left: '57%', size: 10, duration: 10.5, delay: 3.4, tone: 'accent' },
-    { left: '82%', size: 8, duration: 13.5, delay: 1.1, tone: 'accent-2' },
+    { left: '8%', size: 9, duration: 10, offset: -2.5, tone: 'accent' },
+    { left: '29%', size: 7, duration: 12.5, offset: -8, tone: 'accent-2' },
+    { left: '57%', size: 10, duration: 10.5, offset: -5, tone: 'accent' },
+    { left: '82%', size: 8, duration: 13.5, offset: -11, tone: 'accent-2' },
   ] as const
 </script>
 
@@ -28,7 +43,7 @@
         width: `${particle.size}px`,
         height: `${particle.size}px`,
         animationDuration: `${particle.duration}s`,
-        animationDelay: `${particle.delay}s`,
+        animationDelay: `${particle.offset}s`,
       }"
     ></span>
   </div>
@@ -48,6 +63,9 @@
     display: block;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    /* Belt and braces: were an offset ever made positive, the particle would
+       at least wait out the delay invisibly instead of parked at the top. */
+    animation-fill-mode: backwards;
   }
 
   .ambience__particle--accent {
