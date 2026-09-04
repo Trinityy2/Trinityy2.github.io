@@ -38,7 +38,24 @@
         <p v-if="!current" class="work__empty">* No encounters recorded yet.</p>
 
         <template v-else>
-          <ExperienceCard :entry="current" />
+          <!--
+            Every encounter is rendered, stacked into one grid cell, with all
+            but the current one hidden. The deck is therefore always as tall
+            as the tallest card, so stepping through does not move the heading
+            and the sprite — and it stays correct however the entries are
+            edited, which a hard-coded reserve would not.
+          -->
+          <div class="work__deck">
+            <ExperienceCard
+              v-for="(entry, card) in experience"
+              :key="`${entry.organisation} ${entry.dates}`"
+              class="work__card"
+              :class="{ 'work__card--showing': card === index }"
+              :entry="entry"
+              :aria-hidden="card === index ? undefined : 'true'"
+              :inert="card === index ? undefined : true"
+            />
+          </div>
 
           <div class="work__controls">
             <button
@@ -130,6 +147,25 @@
   .work__empty {
     font-size: 13px;
     color: var(--zone-muted);
+  }
+
+  .work__deck {
+    display: grid;
+  }
+
+  /*
+   * Every card occupies the same cell, so the deck takes the height of the
+   * tallest, and every card fills it. A constant frame is deliberate: in the
+   * game the encounter box is a fixed window whatever is inside it, and it
+   * means nothing at all shifts as you step through — not the heading, not
+   * the sprite, not the card's own edges.
+   */
+  .work__deck > * {
+    grid-area: 1 / 1;
+  }
+
+  .work__card:not(.work__card--showing) {
+    visibility: hidden;
   }
 
   .work__controls {

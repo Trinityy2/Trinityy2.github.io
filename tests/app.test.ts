@@ -1,4 +1,4 @@
-import { flushPromises } from '@vue/test-utils'
+import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { parsePosts } from '@/posts/parsePosts'
@@ -134,11 +134,12 @@ describe('the About tabs', () => {
   it('switches content in place, without navigating', async () => {
     const app = await mountApp('/')
 
-    expect(app.text()).not.toContain('LANGUAGES')
+    expect(showingPanel(app).text()).not.toContain('LANGUAGES')
 
     await app.findAll('[role="tab"]')[1].trigger('click')
 
-    expect(app.text()).toContain('LANGUAGES')
+    expect(showingPanel(app).text()).toContain('LANGUAGES')
+    expect(showingPanel(app).text()).not.toContain('SKATING')
     expect(app.vm.$route.path).toBe('/')
   })
 
@@ -251,7 +252,7 @@ describe('the Extras tab', () => {
     const app = await mountApp('/')
     await app.findAll('[role="tab"]')[2].trigger('click')
 
-    const text = app.text()
+    const text = showingPanel(app).text()
     expect(text).toContain('SKATING')
     expect(text).toContain('ATK 5 · DEF 2')
     expect(text).toContain('LIKES')
@@ -381,11 +382,42 @@ describe('the experience carousel', () => {
       ],
     })
 
-    expect(app.text()).toContain('FIRST ROLE')
-    expect(app.text()).toContain('LV 12')
-    expect(app.text()).not.toContain('SECOND ROLE')
+    const showing = showingEncounter(app)
+
+    expect(showing.text()).toContain('FIRST ROLE')
+    expect(showing.text()).toContain('LV 12')
+    expect(showing.text()).not.toContain('SECOND ROLE')
   })
 })
+
+/**
+ * The encounter actually on show.
+ *
+ * Every entry is in the DOM so the deck keeps a constant height, so "one at a
+ * time" is a statement about what is *exposed* rather than what exists: all
+ * but one card is hidden from assistive technology and from interaction.
+ */
+function showingEncounter(app: VueWrapper) {
+  const showing = app.findAll('.encounter').filter((c) => c.attributes('aria-hidden') === undefined)
+
+  expect(showing).toHaveLength(1)
+
+  return showing[0]
+}
+
+/**
+ * The tab panel actually on show. All three are mounted so the deck keeps a
+ * constant height, so "in place" is about what is exposed, not what exists.
+ */
+function showingPanel(app: VueWrapper) {
+  const showing = app
+    .findAll('[role="tabpanel"]')
+    .filter((panel) => panel.attributes('aria-hidden') === undefined)
+
+  expect(showing).toHaveLength(1)
+
+  return showing[0]
+}
 
 function encounters(count: number) {
   return Array.from({ length: count }, (_, i) => ({
@@ -406,11 +438,11 @@ describe('stepping through encounters', () => {
     expect(app.find('.work__counter').text()).toBe('1 / 3')
 
     await next.trigger('click')
-    expect(app.text()).toContain('ROLE 2')
+    expect(showingEncounter(app).text()).toContain('ROLE 2')
     expect(app.find('.work__counter').text()).toBe('2 / 3')
 
     await previous.trigger('click')
-    expect(app.text()).toContain('ROLE 1')
+    expect(showingEncounter(app).text()).toContain('ROLE 1')
     expect(app.find('.work__counter').text()).toBe('1 / 3')
   })
 
@@ -457,12 +489,12 @@ describe('placeholder career entries', () => {
       experience: [{ ...stub, placeholder: true }, real],
     })
 
-    expect(app.text()).toContain('PLACEHOLDER')
+    expect(showingEncounter(app).text()).toContain('PLACEHOLDER')
 
     await app.findAll('button')[1].trigger('click')
 
-    expect(app.text()).toContain('ROLE 2')
-    expect(app.text()).not.toContain('PLACEHOLDER')
+    expect(showingEncounter(app).text()).toContain('ROLE 2')
+    expect(showingEncounter(app).text()).not.toContain('PLACEHOLDER')
   })
 
   it('ships real history, with no placeholder left anywhere in it', async () => {
@@ -474,7 +506,7 @@ describe('placeholder career entries', () => {
 
     // Only one entry shows at a time, so the whole list has to be walked.
     for (let seen = 0; seen < total; seen += 1) {
-      expect(app.text()).not.toContain('PLACEHOLDER')
+      expect(showingEncounter(app).text()).not.toContain('PLACEHOLDER')
       if (seen < total - 1) await next.trigger('click')
     }
   })

@@ -1,9 +1,14 @@
 <script setup lang="ts">
+  import { toRef } from 'vue'
+
   import SoulHeart from '@/components/SoulHeart.vue'
   import { useTypewriter } from '@/composables/useTypewriter'
   import { profile } from '@/data/profile'
 
-  const typed = useTypewriter(profile.bio)
+  /** Whether this tab is the one being looked at. Typing restarts on entry. */
+  const props = withDefaults(defineProps<{ active?: boolean }>(), { active: true })
+
+  const typed = useTypewriter(profile.bio, toRef(props, 'active'))
 </script>
 
 <template>

@@ -42,10 +42,26 @@
             </div>
           </div>
 
-          <div class="about__panel" role="tabpanel">
-            <BioTab v-if="tab === 'bio'" />
-            <SkillsTab v-else-if="tab === 'skills'" />
-            <ExtrasTab v-else />
+          <!--
+            All three panels are mounted and stacked into one grid cell, so
+            the deck is always as tall as the tallest of them and the masthead
+            above it cannot drift. A hard-coded reserve did this job before
+            and went stale the first time the content was edited.
+          -->
+          <div class="about__deck">
+            <div
+              v-for="entry in TABS"
+              :key="entry.id"
+              class="about__panel"
+              :class="{ 'about__panel--showing': tab === entry.id }"
+              role="tabpanel"
+              :aria-hidden="tab === entry.id ? undefined : 'true'"
+              :inert="tab === entry.id ? undefined : true"
+            >
+              <BioTab v-if="entry.id === 'bio'" :active="tab === 'bio'" />
+              <SkillsTab v-else-if="entry.id === 'skills'" />
+              <ExtrasTab v-else />
+            </div>
           </div>
         </div>
       </div>
@@ -154,24 +170,22 @@
     color: var(--zone-muted);
   }
 
-  .about__panel {
+  .about__deck {
+    display: grid;
     margin-top: 18px;
+  }
+
+  /* Every panel occupies the same cell, so the deck takes the tallest one. */
+  .about__deck > * {
+    grid-area: 1 / 1;
+  }
+
+  .about__panel {
     text-align: left;
   }
 
-  /*
-   * Reserve the height of the tallest tab.
-   *
-   * Without this, vertically centring the stage means the masthead and the
-   * sprite drift up and down as the visitor switches tabs, because the block
-   * being centred changes height under them. 344px was measured against all
-   * three tabs across the desktop range: the worst case is 342px, at the
-   * 900px breakpoint where the skills grid is most cramped.
-   */
-  @media (min-width: 900px) {
-    .about__panel {
-      min-height: 344px;
-    }
+  .about__panel:not(.about__panel--showing) {
+    visibility: hidden;
   }
 
   .about__tabs {
