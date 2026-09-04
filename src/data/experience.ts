@@ -37,7 +37,7 @@ export const experience: readonly Experience[] = [
       '* Orchestrating fleets of Claude Code agents — many workers, one plan.',
       '* Building the internal tooling that hands the rest of the team a speed buff.',
     ],
-    tags: ['Claude Code', 'Agentic Orchestration', 'Developer Tooling'],
+    tags: ['Claude Code', 'Claude Skills', 'Agentic Orchestration', 'Developer Tooling'],
   },
   {
     title: 'SOFTWARE ENGINEER',
