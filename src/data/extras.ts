@@ -27,6 +27,7 @@ export const likes: readonly string[] = [
   '* Espresso. Main ingredient for power up potions.',
   '* Cold weather. Snowboarding, a plus.',
   '* Music. It fills you with determination.',
+  '* 3D printing. Crafting, with a very long cast time.',
 ]
 
 export const dislikes: readonly string[] = [

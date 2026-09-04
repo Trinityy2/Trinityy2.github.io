@@ -28,6 +28,18 @@ export interface Experience {
  */
 export const experience: readonly Experience[] = [
   {
+    title: 'SENIOR SOFTWARE ENGINEER',
+    organisation: 'Red Dot AI, Singapore',
+    dates: 'Aug 2026 — Now',
+    level: 15,
+    responsibilities: [
+      '* Still on probation. Still shipping.',
+      '* Orchestrating fleets of Claude Code agents — many workers, one plan.',
+      '* Building the internal tooling that hands the rest of the team a speed buff.',
+    ],
+    tags: ['Claude Code', 'Agentic Orchestration', 'Developer Tooling'],
+  },
+  {
     title: 'SOFTWARE ENGINEER',
     organisation: 'Persol / GIC, Singapore',
     dates: 'Feb 2026 — Jul 2026',
